@@ -40,3 +40,5 @@ Pro tier includes daily backups and point-in-time recovery. An actual restore-to
 ## Environment variables
 
 See `.env.local.example`. `SUPABASE_SERVICE_ROLE_KEY` and `PII_ENCRYPTION_KEY` are server-only and must never be prefixed `NEXT_PUBLIC_`.
+
+**`PII_ENCRYPTION_KEY`** (added Phase 1, TASK-025) encrypts BVN/NIN at rest via `pgp_sym_encrypt` (see `supabase/migrations/010_domain_functions.sql`). It was generated once as 32 random bytes, base64-encoded, and lives only in `.env.local` — which is gitignored and therefore **not backed up anywhere by this repo**. **If this key is lost, every stored BVN/NIN becomes permanently undecryptable — there is no recovery path.** Before real beneficiary data is imported, copy it somewhere durable (a password manager, or a secrets manager if this deploys to Vercel) and set the same value there. Rotating it later requires decrypting every identifier with the old key and re-encrypting with the new one — not a task to improvise under pressure, so treat the current value as permanent once real data exists.
