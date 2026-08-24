@@ -254,59 +254,59 @@ Two external blockers should be chased in week one, in parallel with Phase 0, be
 **Phase prompt:**
 > "Read docs/product-roadmap.md and find Phase 3. Then read only the Reference sections listed above from docs/prd.md and docs/product-vision.md. Continue from the first unchecked task. After each task, mark it complete in the roadmap. When all tasks are done, create a branch `phase-3/lists-filters-and-export`, commit, push, and open a PR for review."
 
-- [ ] **TASK-044** — Build URL-synced filter state
+- [x] **TASK-044** — Build URL-synced filter state
   Files: `src/components/features/filters/useFilterState.ts`
   Notes: Use `nuqs`. The filter object is the single source of truth for the list query, the displayed count, and the export request — **this is what guarantees exports match the screen.** Verify: changing a filter updates the URL; the back button restores the previous view.
 
-- [ ] **TASK-045** — Build the filter bar component
+- [x] **TASK-045** — Build the filter bar component
   Files: `src/components/features/filters/FilterBar.tsx`
   Notes: Filters, not sort options, per the source specification § 17 and Vision § 3. Configurable per screen: sport, bank, accreditation, payment status, committee, name search. Announce result counts through an ARIA live region on change. Verify: keyboard navigable end to end.
 
-- [ ] **TASK-046** — Build the data table with keyset pagination
+- [x] **TASK-046** — Build the data table with keyset pagination
   Files: `src/components/features/table/DataTable.tsx`, `src/lib/query/keyset.ts`
   Notes: `@tanstack/react-table` for column config, server-rendered rows. Keyset pagination on `(full_name, id)` — **no offset pagination anywhere**, it degrades badly past a few thousand rows. Default sort alphabetical by name. Loading skeletons preserve column widths. Verify: 50k rows paginate under 400ms p95.
 
-- [ ] **TASK-047** — Build the participations query layer
+- [x] **TASK-047** — Build the participations query layer
   Files: `src/lib/query/participations.ts`
   Notes: One function taking the filter object, returning `{ rows, nextCursor, totalCount }`. Reads `participations_v` for editors and `participations_viewer_v` for viewers — the choice is made from the session role, not from a parameter. `totalCount` must be computed from the same filter the export will use. Verify: a test asserts list count equals export count for ten random filter combinations.
 
-- [ ] **TASK-048** — Build the participants state-selection screen
+- [x] **TASK-048** — Build the participants state-selection screen
   Files: `src/app/(app)/participants/page.tsx`
   Notes: Per PRD § 8. Nine state cards with counts for editors. Viewers are redirected straight to their assigned state — **no "All States" option and no "Sort by State" control for them anywhere.** Verify: a viewer never sees the selection screen.
 
-- [ ] **TASK-049** — Build the participants category list
+- [x] **TASK-049** — Build the participants category list
   Files: `src/app/(app)/participants/[state]/[category]/page.tsx`
   Notes: The core working screen. Filters: sport, bank, accreditation, payment status, name. Columns vary by role — viewers see no amounts. Empty state: "No athletes uploaded for Bayelsa yet. Upload a pre-games list to begin." Verify: filtering by sport and status narrows correctly and the count updates.
 
-- [ ] **TASK-050** — Build the personnel screens
+- [x] **TASK-050** — Build the personnel screens
   Files: `src/app/(app)/personnel/[category]/page.tsx`
   Notes: LOC, MOC, technical leads, technical officials, state liaisons, volunteers. **No state selector, no "All States", no "Sort by State"** — personnel are not state-organised. LOC filters by committee, listed alphabetically; MOC is one general list; technical leads and officials filter by sport. Verify: each category shows the correct filter set.
 
-- [ ] **TASK-051** — Build the participation detail drawer
+- [x] **TASK-051** — Build the participation detail drawer
   Files: `src/components/features/ParticipationDrawer.tsx`
   Notes: Full record plus **cross-edition history for that person** — this is the payoff of the person/participation split and the fastest way to resolve a state's dispute in the conversation rather than after it. Identifiers masked; reveal is a separate logged action built in Phase 5. Verify: a person present in two editions shows both.
 
-- [ ] **TASK-052** — Build the Excel exporter
+- [x] **TASK-052** — Build the Excel exporter
   Files: `src/lib/export/xlsx.ts`
   Notes: `exceljs`. **Account numbers written with `numFmt: '@'`** or 16 of 45 sample records lose their leading zeros. Column set differs by role. Filename pattern `ndg-2026-delta-basketball-paid-20260815.xlsx`. Bypass the `supabase-js` 1,000-row default by paginating explicitly or using `postgres-js`. Verify: a 3,000-row export completes in under 10 seconds with zeros intact.
 
-- [ ] **TASK-053** — Build the PDF exporter
+- [x] **TASK-053** — Build the PDF exporter
   Files: `src/lib/export/pdf.ts`
   Notes: `@react-pdf/renderer`. **Must paginate the full result set** — never truncate to page one, which is called out explicitly in the source specification § 29. Print-legible in black and white. Verify: a 1,500-row export contains every row across pages.
 
-- [ ] **TASK-054** — Build the export route handler
+- [x] **TASK-054** — Build the export route handler
   Files: `src/app/api/export/route.ts`
   Notes: Takes the same filter object as the list. Streams the file. Writes an `access_logs` row with filters and record count. If generation exceeds the function timeout, write to Supabase Storage and return a signed URL instead of failing. Verify: exported count equals on-screen count, asserted in a test.
 
-- [ ] **TASK-055** — Build the DRM list screen
+- [x] **TASK-055** — Build the DRM list screen
   Files: `src/app/(app)/drm/[category]/page.tsx`
   Notes: Per PRD § 8 and FR-016. Print-optimised: name, account name, account number, bank, state, sport, committee, accreditation status. Render the disclaimer prominently: **"Any individual who is not accredited will not be paid."** Downloadable as Excel and PDF. Verify: the printed output is legible in black and white and the disclaimer appears on every page.
 
-- [ ] **TASK-056** — Build the upload checklist screen
+- [x] **TASK-056** — Build the upload checklist screen
   Files: `src/app/(app)/imports/checklist/page.tsx`
   Notes: Per FR-023. State × category grid showing uploaded or not, date, and uploader — derived entirely from `import_runs` with no separate bookkeeping. Verify: importing a state's athletes flips exactly one cell.
 
-- [ ] **TASK-057** — Build the editor home work queue
+- [x] **TASK-057** — Build the editor home work queue
   Files: `src/app/(app)/page.tsx`
   Notes: Per PRD § 8 Screen: Editor Home. Three panels — outstanding uploads by state, open review items, recent batches. **This is a work queue, not analytics** — dashboard tiles are out of scope for v1. Verify: counts link through to the relevant screens.
 

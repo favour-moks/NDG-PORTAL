@@ -599,13 +599,16 @@ export type Database = {
           "arrival_accredited": boolean | null
           "arrival_accredited_at": string | null
           "arrival_source": string | null
+          "arrival_accredited_by": string | null
           "entitlement_amount": number | null
           "exclusion_reason": string | null
+          "excluded_by": string | null
+          "excluded_at": string | null
+          "is_payable": boolean | null
+          "requires_arrival_accreditation": boolean | null
           "source_import_id": string | null
           "created_at": string | null
           "updated_at": string | null
-          "requires_arrival_accreditation": boolean | null
-          "is_payable": boolean | null
           "full_name": string | null
           "normalised_name": string | null
           "phone": string | null
@@ -617,6 +620,7 @@ export type Database = {
           "bank_name": string | null
           "amount_paid": number | null
           "balance": number | null
+          "payment_status": string | null
         }
         Relationships: []
       }
@@ -638,6 +642,7 @@ export type Database = {
           "arrival_accredited": boolean | null
           "is_payable": boolean | null
           "payment_status": string | null
+          "bank_id": string | null
         }
         Relationships: []
       }
