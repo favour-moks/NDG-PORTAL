@@ -88,13 +88,15 @@ select is(
   'a viewer gets zero rows from payments, unconditionally'
 );
 
--- 42501 is Postgres's code for "new row violates row-level security policy".
+-- Plain 2-arg form (sql, errcode) — see the comment in rls_editor.sql on
+-- why a third text argument isn't used here. 42501 is Postgres's code
+-- for "new row violates row-level security policy" — a viewer cannot
+-- write to participations even within their own state.
 select throws_ok(
   format($$ insert into participations (edition_id, person_id, category_id, state_id)
             values (%L, %L, %L, %L) $$,
          :'edition_id', :'person_uninserted_id', :'category_id', :'state_mine_id'),
-  '42501',
-  'a viewer cannot write to participations even within their own state'
+  '42501'
 );
 
 select is(
