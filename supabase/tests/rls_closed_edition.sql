@@ -23,7 +23,7 @@ select gen_random_uuid() as editor_id         \gset
 
 insert into editions (id, name, year, status, closed_at) values
   (:'closed_edition_id', 'RLS Closed Test Edition', 2996, 'closed', now()),
-  (:'open_edition_id', 'RLS Open Test Edition', 2995, 'active');
+  (:'open_edition_id', 'RLS Open Test Edition', 2995, 'active', null);
 
 insert into states (id, name, code) values (:'state_id', 'RLS Closed Test State', 'CTS');
 
