@@ -10,23 +10,30 @@
     "db:new": "npx supabase migration new",
     "db:push": "node --env-file=.env.local scripts/with-db-url.mjs db push --include-seed",
     "db:reset": "node --env-file=.env.local scripts/with-db-url.mjs db reset",
-    "db:types": "node --env-file=.env.local scripts/db-types.mjs"
+    "db:types": "node --env-file=.env.local scripts/db-types.mjs",
+    "test": "vitest run"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
+    "exceljs": "^4.4.0",
     "next": "16.3.1",
+    "papaparse": "^5.6.0",
+    "postgres": "^3.4.9",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/papaparse": "^5.5.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   }
 }
