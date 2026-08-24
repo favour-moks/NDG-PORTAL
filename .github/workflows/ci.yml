@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  typecheck-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx next typegen
+      - run: npx tsc --noEmit
+      - run: npm run lint
+
+  service-role-key-not-in-client-bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # A build-only marker, deliberately distinctive, standing in for the
+      # real secret so this check works without ever handling it. If this
+      # string turns up anywhere under .next/static (the client bundle),
+      # the service-role client is somehow reachable from browser code.
+      - name: Build with a traceable marker in place of the service-role key
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+          SUPABASE_SERVICE_ROLE_KEY: CI_MARKER_SERVICE_ROLE_KEY_MUST_NOT_LEAK_TO_CLIENT
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+      - name: Fail if the marker leaked into the client bundle
+        run: |
+          if grep -r "CI_MARKER_SERVICE_ROLE_KEY_MUST_NOT_LEAK_TO_CLIENT" .next/static; then
+            echo "SUPABASE_SERVICE_ROLE_KEY reached the client bundle. admin.ts must only be imported from server-only code."
+            exit 1
+          fi
+
+  rls-suite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: supabase start
+      # Applies every migration in supabase/migrations plus supabase/seed.sql
+      # against the fresh local Postgres started above.
+      - run: supabase db reset --local
+      # This suite is a permanent gate — never skip it (product-roadmap.md,
+      # TASK-018 and the Session Tips section).
+      - run: supabase test db --local supabase/tests

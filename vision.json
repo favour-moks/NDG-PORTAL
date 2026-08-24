@@ -1,0 +1,81 @@
+{
+  "meta": {
+    "createdAt": "2026-08-15T10:00:00Z",
+    "updatedAt": "2026-08-15T10:00:00Z",
+    "version": "1.1",
+    "plaidVersion": "1.0"
+  },
+  "creator": {
+    "name": "Favour",
+    "expertise": "Consulting at Crestpoint Consulting — accreditation, beneficiary management and payment delivery for large multi-state sports events, including the Niger Delta Games across nine states",
+    "background": "I already do this job by hand. Crestpoint delivers NDG accreditation and payment support across nine states, and I have personally written the per-state final reports — Abia, Akwa Ibom, Bayelsa, Cross River — and assembled payment reports from the vendor's transaction exports after the fact. Every edition the same question gets asked hourly during Games week: who has been accredited, who is eligible, who has actually been paid? Answering it means opening several workbooks and hoping they agree. I want to build the system that answers it in one place, and that NDG keeps using every year rather than rebuilding each edition."
+  },
+  "purpose": {
+    "whoYouHelp": "The NDG Secretariat's payment and finance lead — the specific individual who owns the master beneficiary spreadsheet, assembles disbursement schedules for the payment vendor, and takes the call when a state says its coaches were not paid. Secondarily, the nine state liaisons who need to answer questions about their own state without going through the Secretariat.",
+    "problemYouSolve": "Nobody can currently answer 'who has been accredited, who is eligible, and who has been paid?' without opening several state workbooks and a stack of Word reports. During Games week that question is asked hourly by people with authority, and the answer arrives late and sometimes wrong. The expensive failures are ghost beneficiaries and double payments — real money out the door plus audit exposure. The everyday failure is invisible: in the February 2026 Edo coaches batch, three of thirty-four records disappeared from the payment report entirely, and because only successful transactions are captured, nothing flagged them.",
+    "desiredTransformation": "The Secretariat moves from reconstructing the truth after the fact to holding it continuously. Instead of assembling an answer from nine spreadsheets over hours, the payment lead applies a filter and has it in seconds — and can trust it, because eligibility is computed from accreditation rather than asserted by whoever last edited the file. State liaisons answer their own questions instead of calling the Secretariat. And because every edition lives in the same system, 'was this person paid last year?' becomes answerable for the first time.",
+    "whyYou": "Crestpoint is already delivering this manually and holds the data, the client relationship and the domain knowledge. I have written the per-state final reports myself and have access to historical payment records, so the build can be tested against real beneficiary data from day one rather than against fixtures. I also know the person who owns the problem, which means I can validate design decisions in a conversation rather than a survey."
+  },
+  "product": {
+    "name": "NDG Payment Accreditation Portal",
+    "oneLiner": "The NDG Payment Accreditation Portal is the permanent system of record that decides who is eligible to be paid at each edition of the Niger Delta Games and produces the file that pays them.",
+    "howItWorks": "Ahead of the Games, editors import each state's pre-games accreditation list against a template that requires BVN or NIN. The portal deduplicates within the edition and warns against previous editions, flagging conflicts for review rather than deleting anything. As people arrive, arrival accreditation status flows in from the biometric owner, and eligibility is computed rather than asserted — nobody who has not completed the required accreditation appears on a payable list. The payment lead then filters to a category, state or sport and exports a disbursement file in the exact format the payment partner accepts. Results import back, and every person's status updates. State liaisons log in and see their own state across every edition, with no financial figures.",
+    "keyCapabilities": [
+      "Edition-scoped beneficiary import with mandatory BVN or NIN, validating 10-digit NUBAN account numbers as text so leading zeros survive",
+      "Duplicate detection within and across editions using identifier matching plus trigram name similarity, surfacing conflicts for editor review rather than silently deleting",
+      "Accreditation-driven payment eligibility linking pre-games accreditation to arrival verification, so nobody unaccredited becomes payable",
+      "Disbursement file generation in the payment partner's required format, with result import and per-person, per-batch payment status",
+      "Role and state scoped access with filter-respecting Excel and PDF export, and access logging that records what was viewed rather than only who signed in"
+    ],
+    "platform": "web",
+    "marketDifferentiation": "Unlike the master spreadsheet it replaces, the portal computes eligibility from accreditation instead of trusting whoever last edited the file, and can produce the disbursement file the payment partner accepts. Unlike a reporting dashboard bolted on afterwards, it is edition-scoped from the schema up, so the next Games starts from last year's data rather than from an empty file. Its real competitor is not other software — it is the spreadsheet, the WhatsApp thread, and the printed list at the accreditation desk.",
+    "magicMoment": "The payment lead filters to 2026 → Delta → Basketball → eligible, clicks once, and gets a disbursement file the payment vendor accepts without a single manual correction. The moment that file is the artifact that moves money, the master spreadsheet stops being the source of truth — because it can no longer produce the thing that matters."
+  },
+  "audience": {
+    "primaryUser": "The NDG Secretariat's payment and finance lead. During Games week they are answering questions from people with authority, chasing states for outstanding submissions, and assembling payment schedules under time pressure. They own the master workbook and every discrepancy lands on their desk. They are highly competent in Excel and sceptical of systems that add steps without removing any.",
+    "secondaryUsers": [
+      "State liaisons across the nine states (Abia, Akwa Ibom, Bayelsa, Cross River, Delta, Edo, Imo, Ondo, Rivers) who need to check accreditation and payment status for their own state, across editions, without seeing financial amounts or other states",
+      "Secretariat editors — up to five working concurrently — covering accreditation, uploads, DRM review and reporting",
+      "Accreditation desk staff at the venue, who need arrival status to be reflected quickly and who will fall back to paper the moment the network drops"
+    ],
+    "currentAlternatives": "Per-state Excel workbooks, WhatsApp threads, printed DRM lists signed at accreditation desks, payment schedules handed to a third-party vendor (Dunamis-Icon Limited is the company of record on every Edo transaction), and manually written per-state final reports. The process works — it has shipped payments for previous editions and everyone knows how to operate it.",
+    "frustrations": "Functionally, no single source agrees with any other and there is no identifier linking a person across batches, let alone across editions — the February and April 2026 Edo batches use entirely incompatible reference schemes. Practically, reconciliation costs hours during the week when hours are least available, and failures are invisible because only successful transactions are recorded. Emotionally, the payment lead is accountable for an answer they cannot verify, and states experience the delay as being ignored."
+  },
+  "business": {
+    "revenueModel": "free",
+    "initialGoal": "By the close of this edition, the portal is the source of truth for status: every editor and all nine state liaisons use it to answer who is accredited, who is eligible and who has been paid, and the answer is trusted enough that nobody reconstructs it from spreadsheets first. Disbursement files may still be assembled outside the portal this edition, but the capability to generate them is built and demonstrated against real data.",
+    "sixMonthVision": "The Games are done and the edition is closed and locked. Rollover screens are built, so the next edition seeds from this one instead of starting empty. The disbursement file format is agreed with the payment partner and the portal generates it, making the next edition the one where payments run through the system rather than alongside it. Ownership between editions is settled — a named person at the Secretariat, documented credentials, funded hosting.",
+    "constraints": "Solo build using Claude Code, under twelve weeks to a fixed Games date that cannot slip. Arrival biometric accreditation and wallet/ATM card issuance are owned by third parties, so their data formats and timelines are outside my control. Commercial arrangement with the Secretariat is not yet settled. Compliance obligations under the Nigeria Data Protection Act apply — biometric data is sensitive personal data, and the system will hold BVN/NIN and bank details for roughly 2,500 people. Historical edition data exists but is scattered and unreliable.",
+    "goToMarket": "Internal adoption rather than market launch. Train the nine state liaisons ahead of the Games so uploads and status queries flow through the portal from the pre-games stage rather than starting at the venue. Anchor adoption on the DRM List, which states and committees already recognise and sign. Win the payment lead first — if they trust it, everyone else follows; if they keep a private spreadsheet, nothing else matters."
+  },
+  "feeling": {
+    "brandPersonality": "A calm, exact registrar. Official enough that a screenshot can go into a report to the Secretariat without embarrassment, warm enough that a state liaison who uses software twice a year is not intimidated, and functional enough that the payment lead can move fast under pressure. It never jokes about money and never hides a problem.",
+    "toneOfVoice": "Plain, precise and unhurried. States facts rather than opinions, names numbers, and always says what to do next. No jargon, no exclamation marks, no false reassurance. Example warning: '3 records need review before payment — 2 possible duplicates, 1 missing BVN.' Example empty state: 'No athletes uploaded for Bayelsa yet. Upload a pre-games list to begin.' Example error: 'This file could not be read. Account numbers must be text, not numbers, or leading zeros are lost.' Example restriction: 'Payment amounts are not available on your account.'"
+  },
+  "techStack": {
+    "appType": "web",
+    "frontend": {
+      "choice": "Next.js",
+      "rationale": "Largest ecosystem and the best-supported path with Claude Code. Server-side rendering keeps dense, heavily filtered beneficiary tables responsive, and server actions keep disbursement file generation and bulk import off the client. Pairs cleanly with Supabase."
+    },
+    "backend": {
+      "choice": "Supabase",
+      "rationale": "The workload is relational reporting and reconciliation with a strict permission model, not real-time collaboration. Supabase supplies Postgres, auth, storage and row-level security in one managed service, which suits a solo build under twelve weeks. Chosen over Convex deliberately: Convex's real-time reactivity is close to worthless here, while its document model and US-only hosting are actively unhelpful for relational reporting and NDPA posture."
+    },
+    "database": {
+      "choice": "PostgreSQL (Supabase managed, EU region)",
+      "rationale": "The schema is textbook relational — person to edition_participation to payment to batch, plus rates, categories, committees, sports and states. Three specifics decided it: row-level security enforces the state-and-edition viewer rule in the database rather than in React, so a front-end bug cannot leak one state's data to another; pg_trgm gives indexed trigram similarity for matching names with inconsistent case and word order, which is the exact failure mode in the existing data; and pgcrypto encrypts BVN/NIN at rest. Hosted in the EU because Supabase offers no African region and the US is not currently designated adequate by the NDPC — Standard Contractual Clauses go in the processing agreement. Note that hiding financial columns from viewers is done with dedicated views, not RLS, since RLS scopes rows rather than columns."
+    },
+    "auth": {
+      "choice": "Supabase Auth with invite links",
+      "rationale": "Native to the chosen backend and integrates directly with row-level security policies, so identity and permissions share one source. Invite links replace the spec's emailed generated passwords: an editor invites a user, who follows a link and sets their own password, so no credential ever travels by email. The spec's underlying goal — knowing whose account was used — is better served by session and access logging, which also satisfies the NDPA expectation of recording what was viewed rather than only who signed in."
+    },
+    "payments": {
+      "choice": "None",
+      "rationale": "The portal charges nobody. Money leaves via a disbursement file handed to the payment partner and, for this edition, a wallet and ATM card arrangement owned by a third party. No payment processor is in scope and none should be added."
+    }
+  },
+  "tooling": {
+    "codingAgent": "claude-code"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "ndg-portal",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "db:new": "npx supabase migration new",
+    "db:push": "node --env-file=.env.local scripts/with-db-url.mjs db push --include-seed",
+    "db:reset": "node --env-file=.env.local scripts/with-db-url.mjs db reset",
+    "db:types": "node --env-file=.env.local scripts/db-types.mjs"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.4",
+    "@supabase/supabase-js": "^2.112.3",
+    "next": "16.3.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
