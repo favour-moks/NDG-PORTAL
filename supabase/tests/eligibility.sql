@@ -39,9 +39,13 @@ insert into persons (id, full_name, normalised_name, nin_hash) values
 insert into participations (id, edition_id, person_id, category_id, state_id, requires_arrival_accreditation, pre_games_accredited, arrival_accredited, account_number, bank_id)
 values (:'participation1_id', :'edition_id', :'person1_id', :'category_arrival_required_id', :'state_id', true, true, true, '0011223301', (select id from banks limit 1));
 
+-- Plain 2-arg form (sql, errcode) — see supabase/tests/rls_editor.sql for
+-- why a third text argument isn't used (it's matched against the actual
+-- error message, not treated as a free-form description). 428C9 is
+-- Postgres's code for "generated column can only be updated to DEFAULT".
 select throws_ok(
   format($$ update participations set is_payable = true where id = %L $$, :'participation1_id'),
-  'is_payable cannot be written directly through any path — it is a generated column'
+  '428C9'
 );
 
 select is(
