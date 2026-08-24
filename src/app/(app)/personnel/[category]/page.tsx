@@ -114,6 +114,7 @@ export default async function PersonnelListPage({
         filterConfig={filterConfig}
         exportParams={{ edition: edition.id, category: category.id }}
         caption={category.name}
+        showGenerateBatch
       />
 
       {personDetail ? (
