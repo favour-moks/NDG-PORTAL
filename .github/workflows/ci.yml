@@ -61,3 +61,28 @@ jobs:
       # This suite is a permanent gate — never skip it (product-roadmap.md,
       # TASK-018 and the Session Tips section).
       - run: supabase test db --local supabase/tests
+
+  disbursement-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: supabase start
+      - run: supabase db reset --local
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # The MVP's definition of done (product-roadmap.md, TASK-068): a full
+      # import -> accredit -> generate -> verify -> reconcile round trip on
+      # the real Edo fixture, against a real local Postgres. 127.0.0.1:54322
+      # and the postgres/postgres credentials are the Supabase CLI's fixed
+      # local-dev defaults, not a secret. The encryption key only needs to
+      # round-trip within this ephemeral database.
+      - run: npx vitest run tests/e2e/disbursement-roundtrip.spec.ts
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+          PII_ENCRYPTION_KEY: ci-only-disbursement-e2e-test-key-not-a-secret

@@ -128,6 +128,7 @@ export default async function ParticipantsListPage({
         filterConfig={filterConfig}
         exportParams={{ edition: edition.id, category: category.id, state: state.id }}
         caption={`${state.name} — ${category.name}`}
+        showGenerateBatch={!isViewer}
       />
 
       {personDetail ? (

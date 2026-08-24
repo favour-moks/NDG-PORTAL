@@ -325,47 +325,47 @@ Two external blockers should be chased in week one, in parallel with Phase 0, be
 
 > **Blocker:** this phase depends on the payment partner's file format (PRD § 14 question 1). If it has not arrived, build against a **versioned configurable format** so swapping it later is a config change rather than a rewrite — and chase the specification in parallel. Do not guess and hardcode.
 
-- [ ] **TASK-058** — Build the disbursement format configuration
+- [x] **TASK-058** — Build the disbursement format configuration
   Files: `src/lib/export/disbursement/formats/`, `src/lib/export/disbursement/types.ts`
   Notes: Format as versioned config — column order, headers, delimiter, institution-code field name, amount formatting. Ship a `default` format based on the observed vendor export (TransID, BatchID, Reference, VendorCode, VendorName, VendorAcctNumber, Amount, Remarks, VendorBankName) and replace it the moment the real specification arrives. Verify: switching format config changes output without code changes.
 
-- [ ] **TASK-059** — Build the batch generation service
+- [x] **TASK-059** — Build the batch generation service
   Files: `src/lib/export/disbursement/generate.ts`
   Notes: Takes edition, filter and reference. **Includes only rows where `is_payable = true` — unconditionally, with no override option.** Resolves `bank_id` to the partner's institution code. Creates the `payment_batches` row with `filter_json`, `record_count`, `total_amount`, and one `payments` row per participation at `pending`. Single transaction. Verify: a non-payable person cannot appear in output by any route.
 
-- [ ] **TASK-060** — Build the exclusion summary
+- [x] **TASK-060** — Build the exclusion summary
   Files: `src/lib/export/disbursement/exclusions.ts`
   Notes: For the filtered population, count who was excluded and why — not arrival accredited, missing bank details, withdrawn — as in "Excluded from this batch: 47 people. 44 have not completed arrival accreditation, 3 are missing bank details." Verify: counts reconcile exactly with the filtered total.
 
-- [ ] **TASK-061** — Build the disbursement route handler
+- [x] **TASK-061** — Build the disbursement route handler
   Files: `src/app/api/disbursement/route.ts`
   Notes: Generates, streams the file, returns the exclusion summary in a response header for display. Warns if another batch was generated from the same filter within the hour, naming it and its count, and allows deliberate continuation. Verify: two concurrent generations produce a warning, not a silent duplicate.
 
-- [ ] **TASK-062** — Build the payments and batches screen
+- [x] **TASK-062** — Build the payments and batches screen
   Files: `src/app/(app)/payments/page.tsx`, `src/app/(app)/payments/[batchId]/page.tsx`
   Notes: Per PRD § 8. Batch list newest first with reference, date, count, total, status. Detail shows per-person rows and result status. Empty state: "No payment batches yet. Generate one from a filtered participant list." Verify: generating a batch from the participants screen lands here.
 
-- [ ] **TASK-063** — Build the generate-batch flow
+- [x] **TASK-063** — Build the generate-batch flow
   Files: `src/components/features/payments/GenerateBatch.tsx`
   Notes: From a filtered list — show the filter summary and the exclusion breakdown, require a reference, then confirm. The file downloads and the batch is created in the same action. This is the magic moment; keep it to one screen and one confirmation. Verify: end to end from filter to file in under 15 seconds.
 
-- [ ] **TASK-064** — Build the result file parser
+- [x] **TASK-064** — Build the result file parser
   Files: `src/lib/import/payment-results.ts`
   Notes: Match on `partner_reference` first, then `account_number` + `amount` + batch. Set status paid, failed or unmatched with failure reasons. **Rows matching nothing are reported and never auto-assigned; rows matching two participations are reported as ambiguous.** This is precisely where the current manual process loses records — the portal must not repeat it. Verify: a synthetic result file with one unmatched and one ambiguous row reports both.
 
-- [ ] **TASK-065** — Build the result import route and screen
+- [x] **TASK-065** — Build the result import route and screen
   Files: `src/app/api/disbursement/results/route.ts`, `src/components/features/payments/ImportResults.tsx`
   Notes: Returns matched, paid, failed, unmatched counts with an exceptions list, phrased per the voice guide — "1,800 payment results imported. 1,782 successful, 12 failed, 6 unmatched. Review the 18 exceptions." Verify: statuses update only within the target batch.
 
-- [ ] **TASK-066** — Implement paid-to-date and balance
+- [x] **TASK-066** — Implement paid-to-date and balance
   Files: `supabase/migrations/012_payment_aggregates.sql`, `src/lib/query/payments.ts`
   Notes: Per FR-022 — computed from `payments`, never stored on the participation. The real Edo data shows one category paid across two runs six weeks apart, so cumulative totals must be correct across batches. Verify: two batches for the same person produce the correct paid total and balance.
 
-- [ ] **TASK-067** — Build rate management
+- [x] **TASK-067** — Build rate management
   Files: `src/app/(app)/admin/reference/rates/page.tsx`, `src/lib/actions/rates.ts`
   Notes: Per FR-021. Rates by edition × category × optional sport. **Changing a rate must not alter historical payments** — entitlement is resolved at import or approval and payments hold their own amount. Verify: editing a 2026 rate leaves 2025 payments untouched.
 
-- [ ] **TASK-068** — Run the full round trip on real data
+- [x] **TASK-068** — Run the full round trip on real data
   Files: `tests/e2e/disbursement-roundtrip.spec.ts`
   Notes: Import the real Edo records → accredit → filter → generate → verify the file byte-level for leading zeros and institution codes → import a synthetic result file → assert statuses. **This test is the definition of done for the MVP.** Verify: passes in CI.
 

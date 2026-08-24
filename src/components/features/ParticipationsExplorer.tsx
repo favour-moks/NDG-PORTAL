@@ -29,6 +29,7 @@ export function ParticipationsExplorer({
   exportParams,
   caption,
   drm,
+  showGenerateBatch,
 }: {
   page: ParticipationsPage
   // Column keys, not column defs: column defs carry render functions
@@ -42,6 +43,10 @@ export function ParticipationsExplorer({
   exportParams: FixedExportParams
   caption?: string
   drm?: boolean
+  // Viewers never generate batches (payment_batches/payments RLS blocks
+  // them outright) — callers decide whether this link renders at all
+  // rather than this component knowing about roles.
+  showGenerateBatch?: boolean
 }) {
   const { filters, setFilter, setCursor, isPending } = useFilterState()
   const pathname = usePathname()
@@ -112,6 +117,12 @@ export function ParticipationsExplorer({
         <a href={`/api/export?${exportQuery.toString()}&format=xlsx`}>Export Excel</a>
         {' · '}
         <a href={`/api/export?${exportQuery.toString()}&format=pdf`}>Export PDF</a>
+        {showGenerateBatch ? (
+          <>
+            {' · '}
+            <Link href={`/payments/generate?${exportQuery.toString()}`}>Generate disbursement batch</Link>
+          </>
+        ) : null}
       </p>
     </div>
   )
