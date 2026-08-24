@@ -1,33 +1,21 @@
 import { requireRole } from '@/lib/auth/guards'
+import { EditionSwitcher } from '@/components/features/EditionSwitcher'
+import { resolveEdition } from '@/lib/edition/context'
 import { createClient } from '@/lib/supabase/server'
 import { FileDrop } from '@/components/features/import/FileDrop'
 
-export default async function ImportsPage() {
+export default async function ImportsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ edition?: string }>
+}) {
   await requireRole(['admin', 'editor'])
+  const { edition: editionIdParam } = await searchParams
   const supabase = await createClient()
 
-  const [
-    { data: edition },
-    { data: categories },
-    { data: states },
-    { data: sports },
-    { data: committees },
-    { data: importRuns },
-  ] = await Promise.all([
-    supabase.from('editions').select('id, name').eq('status', 'active').maybeSingle(),
-    supabase
-      .from('categories')
-      .select('id, name, is_state_scoped, requires_sport, requires_committee')
-      .eq('active', true)
-      .order('sort_order'),
-    supabase.from('states').select('id, name').eq('active', true).order('name'),
-    supabase.from('sports').select('id, name').eq('active', true).order('name'),
-    supabase.from('committees').select('id, name').eq('active', true).order('name'),
-    supabase
-      .from('import_runs')
-      .select('id, original_name, kind, row_count, accepted_count, rejected_count, status, created_at')
-      .order('created_at', { ascending: false })
-      .limit(20),
+  const [edition, { data: allEditions }] = await Promise.all([
+    resolveEdition(editionIdParam),
+    supabase.from('editions').select('id, name, status').order('year', { ascending: false }),
   ])
 
   if (!edition) {
@@ -39,9 +27,38 @@ export default async function ImportsPage() {
     )
   }
 
+  const [{ data: categories }, { data: states }, { data: sports }, { data: committees }, { data: importRuns }] =
+    await Promise.all([
+      supabase
+        .from('categories')
+        .select('id, name, is_state_scoped, requires_sport, requires_committee')
+        .eq('active', true)
+        .order('sort_order'),
+      supabase.from('states').select('id, name').eq('active', true).order('name'),
+      supabase.from('sports').select('id, name').eq('active', true).order('name'),
+      supabase.from('committees').select('id, name').eq('active', true).order('name'),
+      supabase
+        .from('import_runs')
+        .select('id, original_name, kind, row_count, accepted_count, rejected_count, status, created_at')
+        .eq('edition_id', edition.id)
+        .order('created_at', { ascending: false })
+        .limit(20),
+    ])
+
   return (
     <main>
       <h1>Import — {edition.name}</h1>
+
+      {allEditions && allEditions.length > 1 ? (
+        <EditionSwitcher editions={allEditions} currentEditionId={edition.id} />
+      ) : null}
+
+      {edition.isReference ? (
+        <p>
+          This is a reference edition — advisory only. Records imported here raise non-blocking review
+          items against the active edition and never gate anyone&apos;s eligibility.
+        </p>
+      ) : null}
 
       <FileDrop
         editionId={edition.id}

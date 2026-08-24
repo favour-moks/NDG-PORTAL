@@ -70,11 +70,9 @@ export async function runImport(sql: Sql, request: ImportRequest): Promise<Impor
   try {
     let duplicatesFlagged = 0
     const importRunId = await sql.begin(async (tx) => {
-      const seenPersonIds = new Set<string>()
-
       for (const row of validatedRows) {
-        const outcome = await persistRow(tx, row, request, seenPersonIds)
-        if (outcome.kind === 'duplicate_within_file') {
+        const outcome = await persistRow(tx, row, request)
+        if (outcome.kind === 'already_participating') {
           duplicatesFlagged++
           continue
         }
