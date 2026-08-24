@@ -19,15 +19,31 @@ insert into states (name, code) values
 -- Participants are state-scoped; personnel are not (PRD § 3).
 -- ============================================================
 
-insert into categories (name, group_key, is_state_scoped, requires_sport, requires_committee, sort_order) values
-  ('Athletes', 'participants', true,  true,  false, 10),
-  ('Coaches',  'participants', true,  true,  false, 20),
-  ('LOC',                 'personnel', false, false, true,  30),
-  ('MOC',                 'personnel', false, false, false, 40),
-  ('Technical Leads',     'personnel', false, true,  false, 50),
-  ('Technical Officials', 'personnel', false, true,  false, 60),
-  ('State Liaisons',      'personnel', false, false, false, 70),
-  ('Volunteers',          'personnel', false, false, false, 80);
+-- requires_arrival_accreditation defaults to true for every category except
+-- LOC: LOC members organise before the Games start and may not go through
+-- venue arrival accreditation the way athletes/coaches/officials do. This
+-- is a reasonable starting default, not a confirmed policy — flagged in
+-- docs/infrastructure.md as needing the Secretariat's sign-off (PRD § 14
+-- open question 3) before real payments depend on it.
+-- ON CONFLICT DO UPDATE, not a plain INSERT: unique(name, group_key) means
+-- a plain insert is a silent no-op against a database that already has
+-- these rows, so a later edit to any value here (like requires_arrival_
+-- accreditation) would never actually reach an already-seeded database.
+insert into categories (name, group_key, is_state_scoped, requires_sport, requires_committee, sort_order, requires_arrival_accreditation) values
+  ('Athletes', 'participants', true,  true,  false, 10, true),
+  ('Coaches',  'participants', true,  true,  false, 20, true),
+  ('LOC',                 'personnel', false, false, true,  30, false),
+  ('MOC',                 'personnel', false, false, false, 40, true),
+  ('Technical Leads',     'personnel', false, true,  false, 50, true),
+  ('Technical Officials', 'personnel', false, true,  false, 60, true),
+  ('State Liaisons',      'personnel', false, false, false, 70, true),
+  ('Volunteers',          'personnel', false, false, false, 80, true)
+on conflict (name, group_key) do update set
+  is_state_scoped = excluded.is_state_scoped,
+  requires_sport = excluded.requires_sport,
+  requires_committee = excluded.requires_committee,
+  sort_order = excluded.sort_order,
+  requires_arrival_accreditation = excluded.requires_arrival_accreditation;
 
 -- ============================================================
 -- Sports — editable later via the reference-data admin screen (Phase 5)

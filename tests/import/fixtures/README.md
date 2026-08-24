@@ -39,3 +39,25 @@ exactly which required columns are missing.
 
 Covered by `fixtures.test.ts` in this directory, which runs the real `parseSpreadsheet` /
 `validateRow` pipeline against all three files and asserts on the outcomes above.
+
+## Reference-edition import (TASK-042, TASK-043)
+
+TASK-043 asks for the available historical NDG data to be loaded as reference editions, "so the
+first demo feels like a system rather than a prototype — the payment lead must recognise the
+data." No real historical data was available when Phase 2 was built, for the same reason there's
+no real Edo file above — and unlike the fixtures here, permanently seeding the *live* database
+with synthetic people under a name like "NDG 2025" would be actively misleading, not just
+incomplete: a payment lead looking for data they recognise would find neither.
+
+So instead of leaving fake history in the database, the mechanism was verified end to end and
+then torn down: `createReferenceEdition()` (`src/lib/import/reference.ts`) creates a closed,
+`is_reference = true` edition; `edo-coaches-real.xlsx` was imported into one via the real
+`/imports` UI (using the edition switcher to target it) and came back 45/45 accepted; re-running
+the same import against the same edition correctly reported all 45 as already participating
+(`duplicatesFlagged: 45`) rather than erroring, which is itself a bug this verification pass
+caught and fixed in `persist.ts`. All of that test data was then deleted.
+
+**The actual historical load is still open** — run it for real once genuine historical NDG data
+(the Edo file, or whatever else exists) is available, using the same path: create a reference
+edition from the Admin → Editions screen or `createReferenceEdition()`, then import through
+`/imports` with that edition selected via the switcher. No new code is needed.

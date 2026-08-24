@@ -9,6 +9,10 @@ export type ImportTargetOptions = {
   stateId: string | null
   sportId: string | null
   committeeId: string | null
+  // Denormalised onto the participation at insert — is_payable is a
+  // generated column and generated columns cannot join categories
+  // (TASK-033, supabase/migrations/011_arrival_requirement.sql).
+  requiresArrivalAccreditation: boolean
   piiEncryptionKey: string
 }
 
@@ -20,7 +24,7 @@ export type PersistRowOutcome =
       normalisedName: string
       accountNumber: string
     }
-  | { kind: 'duplicate_within_file'; personId: string }
+  | { kind: 'already_participating'; personId: string }
 
 // Thrown when a row's BVN and NIN resolve to two different existing people.
 // duplicate_reviews.participation_id is NOT NULL — a review row can only
@@ -47,8 +51,7 @@ export class IdentifierConflictError extends Error {
 export async function persistRow(
   sql: ISql,
   row: ValidatedRow,
-  options: ImportTargetOptions,
-  seenPersonIds: Set<string>
+  options: ImportTargetOptions
 ): Promise<PersistRowOutcome> {
   const bvnHash = row.bvn ? hashIdentifier(row.bvn) : null
   const ninHash = row.nin ? hashIdentifier(row.nin) : null
@@ -85,12 +88,20 @@ export async function persistRow(
     personId = created.id
   }
 
-  if (seenPersonIds.has(personId)) {
-    // Same person appears twice in this file — import once, flag once
-    // (PRD § 11 Edge Cases > Import). No second participation is created.
-    return { kind: 'duplicate_within_file', personId }
+  // Covers both cases uniformly: this person appearing twice in the same
+  // file (participations.unique(edition_id, person_id) — a row inserted
+  // earlier in this same transaction is visible to this SELECT, since a
+  // transaction sees its own writes), and this person already having a
+  // participation in this edition from an earlier import run entirely.
+  // Both are "import once, flag once" (PRD § 11 Edge Cases > Import) — the
+  // alternative is a raw unique-constraint violation surfacing as an
+  // uncaught 500 instead of a clean outcome.
+  const [existingParticipation] = await sql<{ id: string }[]>`
+    select id from participations where edition_id = ${options.editionId} and person_id = ${personId}
+  `
+  if (existingParticipation) {
+    return { kind: 'already_participating', personId }
   }
-  seenPersonIds.add(personId)
 
   const entitlement = await sql<{ amount: string }[]>`
     select amount from rates
@@ -104,12 +115,14 @@ export async function persistRow(
   const [participation] = await sql<{ id: string }[]>`
     insert into participations (
       edition_id, person_id, category_id, state_id, sport_id, committee_id,
-      account_name, account_number, bank_id, entitlement_amount
+      account_name, account_number, bank_id, entitlement_amount,
+      requires_arrival_accreditation
     ) values (
       ${options.editionId}, ${personId}, ${options.categoryId}, ${options.stateId},
       ${options.sportId}, ${options.committeeId},
       ${row.accountName}, ${row.accountNumber}, ${row.bankId},
-      ${entitlement[0]?.amount ?? null}
+      ${entitlement[0]?.amount ?? null},
+      ${options.requiresArrivalAccreditation}
     )
     returning id
   `

@@ -8,11 +8,10 @@ import { runImport } from '@/lib/import/run'
 // transaction rather than supabase-js — both already bypass RLS by design,
 // consistent with admin.ts's documented permitted uses.
 import { createAdminClient } from '@/lib/supabase/admin'
+import { ensureImportsBucket, IMPORTS_BUCKET, MAX_IMPORT_FILE_SIZE } from '@/lib/storage/imports-bucket'
 
-const MAX_FILE_SIZE = 20 * 1024 * 1024 // 20MB, per PRD § 4
 const ALLOWED_EXTENSIONS = ['.xlsx', '.csv']
 const IMPORTS_PER_HOUR_LIMIT = 5
-const IMPORTS_BUCKET = 'imports'
 
 export async function POST(request: Request) {
   const profile = await getSessionProfile()
@@ -48,7 +47,7 @@ export async function POST(request: Request) {
       { status: 400 }
     )
   }
-  if (file.size > MAX_FILE_SIZE) {
+  if (file.size > MAX_IMPORT_FILE_SIZE) {
     return NextResponse.json(
       { error: 'File exceeds 20MB. Split it by category and upload separately.' },
       { status: 413 }
@@ -70,9 +69,14 @@ export async function POST(request: Request) {
     }
 
     const [category] = await sql<
-      { requires_sport: boolean; requires_committee: boolean; is_state_scoped: boolean }[]
+      {
+        requires_sport: boolean
+        requires_committee: boolean
+        is_state_scoped: boolean
+        requires_arrival_accreditation: boolean
+      }[]
     >`
-      select requires_sport, requires_committee, is_state_scoped
+      select requires_sport, requires_committee, is_state_scoped, requires_arrival_accreditation
       from categories where id = ${categoryId}
     `
     if (!category) {
@@ -110,6 +114,7 @@ export async function POST(request: Request) {
       stateId: category.is_state_scoped ? (stateId as string) : null,
       sportId: category.requires_sport ? (sportId as string) : null,
       committeeId: category.requires_committee ? (committeeId as string) : null,
+      requiresArrivalAccreditation: category.requires_arrival_accreditation,
       piiEncryptionKey: process.env.PII_ENCRYPTION_KEY as string,
     })
 
@@ -123,12 +128,5 @@ export async function POST(request: Request) {
     return NextResponse.json(result)
   } finally {
     await sql.end()
-  }
-}
-
-async function ensureImportsBucket(admin: ReturnType<typeof createAdminClient>) {
-  const { data } = await admin.storage.getBucket(IMPORTS_BUCKET)
-  if (!data) {
-    await admin.storage.createBucket(IMPORTS_BUCKET, { public: false, fileSizeLimit: MAX_FILE_SIZE })
   }
 }
