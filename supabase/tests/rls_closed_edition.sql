@@ -53,24 +53,29 @@ select is(
   'a closed edition remains readable — read-only means writes are blocked, not that it disappears'
 );
 
+-- A data-modifying WITH clause must be the top-level statement — nesting
+-- it inside a scalar subquery passed as an argument to is() (as this used
+-- to do) is rejected by Postgres outright ("WITH clause containing a
+-- data-modifying statement must be at the top level"), so the CTE has to
+-- lead each statement here, with is() in the SELECT that follows it.
+with updated as (
+  update participations set exclusion_reason = 'test withdrawal'
+  where id = :'participation_closed_id'
+  returning id
+)
 select is(
-  (with updated as (
-     update participations set exclusion_reason = 'test withdrawal'
-     where id = :'participation_closed_id'
-     returning id
-   )
-   select count(*) from updated)::int,
+  (select count(*)::int from updated),
   0,
   'an editor update targeting a participation in a closed edition affects zero rows'
 );
 
+with updated as (
+  update participations set exclusion_reason = 'test withdrawal'
+  where id = :'participation_open_id'
+  returning id
+)
 select is(
-  (with updated as (
-     update participations set exclusion_reason = 'test withdrawal'
-     where id = :'participation_open_id'
-     returning id
-   )
-   select count(*) from updated)::int,
+  (select count(*)::int from updated),
   1,
   'the same editor can update a participation in an open edition (control — the block is edition-specific)'
 );

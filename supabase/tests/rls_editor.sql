@@ -62,8 +62,14 @@ select lives_ok(
   'editor can write to participations in an open edition'
 );
 
+-- throws_ok's 2-arg form is (sql, errcode), not (sql, description) — the
+-- description-only overload doesn't exist, so a plain description string
+-- there gets compared against the real SQLSTATE and fails even when the
+-- right exception was thrown. 428C9 is Postgres's code for "generated
+-- column can only be updated to DEFAULT".
 select throws_ok(
   format($$ update participations set is_payable = true where edition_id = %L $$, :'edition_id'),
+  '428C9',
   'is_payable is a generated column — no role can write it directly, regardless of permissions'
 );
 
