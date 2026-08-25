@@ -19,6 +19,7 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm run lint
       - run: npm test
+      - run: node scripts/check-admin-import-comments.mjs
 
   service-role-key-not-in-client-bundle:
     runs-on: ubuntu-latest

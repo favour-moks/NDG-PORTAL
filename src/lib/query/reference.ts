@@ -56,6 +56,27 @@ export async function listCategories(groupKey: string): Promise<CategoryOption[]
   }))
 }
 
+// Every active category regardless of group — the DRM index links to
+// /drm/[category] for any of them, since state scoping (if any) is a
+// filter chosen on that page, not a route dimension there.
+export async function listAllCategories(): Promise<CategoryOption[]> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('categories')
+    .select('id, name, group_key, is_state_scoped, requires_sport, requires_committee, sort_order')
+    .eq('active', true)
+    .order('sort_order')
+  return (data ?? []).map((c) => ({
+    id: c.id,
+    name: c.name,
+    groupKey: c.group_key,
+    isStateScoped: c.is_state_scoped,
+    requiresSport: c.requires_sport,
+    requiresCommittee: c.requires_committee,
+    sortOrder: c.sort_order,
+  }))
+}
+
 export async function listSports(): Promise<ReferenceOption[]> {
   const supabase = await createClient()
   const { data } = await supabase.from('sports').select('id, name').eq('active', true).order('name')

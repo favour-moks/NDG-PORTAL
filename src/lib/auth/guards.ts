@@ -1,5 +1,7 @@
+import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { logAccess } from '@/lib/audit/log'
 
 export type Role = 'admin' | 'editor' | 'viewer'
 
@@ -25,11 +27,21 @@ export async function getSessionProfile(): Promise<SessionProfile | null> {
 
   const { data: profile } = await supabase
     .from('user_profiles')
-    .select('full_name, role')
+    .select('full_name, role, active')
     .eq('id', user.id)
     .single()
 
   if (!profile) return null
+
+  // A deactivated account keeps a valid Supabase Auth session (deactivation
+  // is a user_profiles flag, not an Auth-level disable) — checking `active`
+  // here, on every request, is what makes "deactivated user's live session
+  // is invalidated on the next request" (TASK-077) actually true, rather
+  // than only true for a fresh sign-in attempt.
+  if (!profile.active) {
+    await supabase.auth.signOut()
+    return null
+  }
 
   return {
     id: user.id,
@@ -47,6 +59,13 @@ export async function requireSession(): Promise<SessionProfile> {
 
 export async function requireRole(allowed: Role[]): Promise<SessionProfile> {
   const profile = await requireSession()
-  if (!allowed.includes(profile.role)) redirect('/')
+  if (!allowed.includes(profile.role)) {
+    // x-pathname is set by middleware.ts (updateSession()) on every
+    // request — headers() itself has no route-path accessor.
+    const headerList = await headers()
+    const route = headerList.get('x-pathname') ?? 'unknown'
+    await logAccess({ action: 'permission_denied', route })
+    redirect('/access-denied')
+  }
   return profile
 }

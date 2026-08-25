@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getSessionProfile } from '@/lib/auth/guards'
 import { createClient } from '@/lib/supabase/server'
+import { logAccess } from '@/lib/audit/log'
 import { parseFiltersFromSearchParams } from '@/lib/query/participations'
 import { fetchAllParticipations } from '@/lib/export/fetchAll'
 import { buildParticipationsWorkbook } from '@/lib/export/xlsx'
@@ -90,14 +91,12 @@ export async function GET(request: Request) {
     filename = `${filenameBase}.pdf`
   }
 
-  await supabase.from('access_logs').insert({
-    user_id: profile.id,
-    role: profile.role,
-    route: '/api/export',
+  await logAccess({
     action: 'export',
-    edition_id: editionId,
+    route: '/api/export',
+    editionId,
     filters: { ...filters, format },
-    record_count: rows.length,
+    recordCount: rows.length,
   })
 
   return new NextResponse(body as BodyInit, {

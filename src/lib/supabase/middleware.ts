@@ -3,9 +3,16 @@ import { NextResponse, type NextRequest } from 'next/server'
 import type { Database } from '@/types/database'
 
 // Refreshes the auth session on every request and redirects unauthenticated
-// requests away from protected routes. Called from the root middleware.ts.
+// requests away from protected routes. Called from the root proxy.ts.
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
+  // Forwarded so server-side code (requireRole()'s permission-denied
+  // logging) can know which route was requested — headers() has no
+  // route-path accessor of its own, and this is the standard way to make
+  // one available downstream.
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-pathname', request.nextUrl.pathname)
+
+  let supabaseResponse = NextResponse.next({ request: { headers: requestHeaders } })
 
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,7 +24,11 @@ export async function updateSession(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({ request })
+          // Rebuilt from requestHeaders, not the bare `request` — otherwise
+          // this reassignment (which fires on most authenticated requests,
+          // whenever Supabase refreshes the session cookie) would silently
+          // drop the x-pathname header set above.
+          supabaseResponse = NextResponse.next({ request: { headers: requestHeaders } })
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           )

@@ -386,43 +386,43 @@ Two external blockers should be chased in week one, in parallel with Phase 0, be
 **Phase prompt:**
 > "Read docs/product-roadmap.md and find Phase 5. Then read only the Reference sections listed above from docs/prd.md and docs/product-vision.md. Continue from the first unchecked task. After each task, mark it complete in the roadmap. When all tasks are done, create a branch `phase-5/access-control-viewers-and-audit`, commit, push, and open a PR for review."
 
-- [ ] **TASK-070** — Build the viewer experience end to end
+- [x] **TASK-070** — Build the viewer experience end to end
   Files: `src/app/(app)/layout.tsx`, `src/lib/auth/guards.ts`
   Notes: Viewers land directly on their state, see an edition label with the ability to browse previous editions, and get a role-scoped navigation with no payments, no admin, no guests and no operations. Permission failures show a message, not a 404, and are logged. Verify: a viewer session cannot reach any editor route.
 
-- [ ] **TASK-071** — Verify financial isolation for viewers
+- [x] **TASK-071** — Verify financial isolation for viewers
   Files: `tests/rls/viewer-financial.test.ts`, `supabase/tests/viewer_columns.sql`
   Notes: Assert that `participations_viewer_v` contains no monetary column via `information_schema`; that a viewer's export contains no amount column; and that `payments` returns zero rows for a viewer. Per FR-013. Verify: suite fails if a money column is ever added to the viewer view.
 
-- [ ] **TASK-072** — Verify cross-state and cross-edition scoping
+- [x] **TASK-072** — Verify cross-state and cross-edition scoping
   Files: `supabase/tests/rls_viewer_states.sql`
   Notes: A Delta viewer gets zero rows for Edo by list, by direct id, and by export. The **same** Delta viewer does see Delta records in a previous edition — the absence of an edition predicate in the viewer policy is deliberate, not an oversight. Verify: both assertions pass.
 
-- [ ] **TASK-073** — Build access logging middleware
+- [x] **TASK-073** — Build access logging middleware
   Files: `src/lib/audit/log.ts`, `middleware.ts`
   Notes: Per FR-018. Every beneficiary read and every export writes user, role, route, action, edition, filters, record count and IP. Logging failures must never block a request. Verify: a viewer listing their state produces exactly one log row carrying the filters.
 
-- [ ] **TASK-074** — Build the identifier reveal action
+- [x] **TASK-074** — Build the identifier reveal action
   Files: `src/lib/actions/identifiers.ts`, `src/components/features/RevealIdentifier.tsx`
   Notes: Per FR-024. Editors only. Decrypts server-side, returns once, writes `access_logs` with `action = 'reveal_identifier'`. Lists always show the masked form. Verify: a viewer cannot invoke it; every reveal is logged.
 
-- [ ] **TASK-075** — Build user invitation and management
+- [x] **TASK-075** — Build user invitation and management
   Files: `src/app/(app)/admin/users/page.tsx`, `src/lib/actions/users.ts`
   Notes: Per FR-019. Invite by email with role and state or category scope; `user_profiles` and `user_state_access` written in the same transaction as the invite. Deactivation revokes the session on the next request. **No password is ever generated or emailed.** Verify: an invited viewer completes setup and sees only their state.
 
-- [ ] **TASK-076** — Build reference data administration
+- [x] **TASK-076** — Build reference data administration
   Files: `src/app/(app)/admin/reference/page.tsx`, `src/lib/actions/reference.ts`
   Notes: Per FR-020. Tabbed inline editing for categories, committees, sports, states and banks. **This screen is what makes the next edition an afternoon rather than a code change** — treat it as load-bearing, not admin filler. Verify: adding a committee requires no deployment and appears immediately in LOC filters.
 
-- [ ] **TASK-077** — Build the deactivation and session revocation path
+- [x] **TASK-077** — Build the deactivation and session revocation path
   Files: `src/lib/actions/users.ts`, `middleware.ts`
   Notes: A deactivated user's live session is invalidated on the next request with a clear message. A viewer whose state assignment is removed mid-session sees no data and an explanation that access changed. Verify: both cases behave correctly with an open browser session.
 
-- [ ] **TASK-078** — Add rate limiting
+- [x] **TASK-078** — Add rate limiting
   Files: `src/lib/rate-limit.ts`, `middleware.ts`
   Notes: 10 auth attempts per 15 minutes; 5 imports per hour per user. Verify: exceeding either returns a clear message, not a generic error.
 
-- [ ] **TASK-079** — Add security headers and a service-role audit
+- [x] **TASK-079** — Add security headers and a service-role audit
   Files: `next.config.ts`, `.github/workflows/ci.yml`
   Notes: HSTS, `nosniff`, `X-Frame-Options: DENY`, CSP disallowing inline scripts. Add a CI check that fails if `SUPABASE_SERVICE_ROLE_KEY` appears in the client bundle, and a lint rule requiring a justifying comment at every `admin.ts` import site. Verify: CI fails on a deliberate violation.
 

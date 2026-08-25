@@ -1,6 +1,7 @@
 import postgres from 'postgres'
 import { requireSession } from '@/lib/auth/guards'
 import { createClient } from '@/lib/supabase/server'
+import { logAccess } from '@/lib/audit/log'
 import { maskIdentifier } from '@/lib/domain/identifiers'
 
 type HistoryRow = {
@@ -131,6 +132,15 @@ export async function getPersonDetail(personId: string): Promise<PersonDetail | 
       await sql.end()
     }
   }
+
+  // FR-018: the drawer is a beneficiary read too — arguably the most
+  // targeted one, since it's a lookup of one specific person rather than
+  // a filtered list.
+  await logAccess({
+    action: 'view_person',
+    route: 'participation-drawer',
+    recordCount: 1,
+  })
 
   return {
     id: person.id,

@@ -1,13 +1,26 @@
 import Link from 'next/link'
 import type { PersonDetail } from '@/lib/query/personDetail'
 import { formatNaira } from '@/lib/format/money'
+import { RevealIdentifier } from '@/components/features/RevealIdentifier'
 
 // Full record + cross-edition history for one person (TASK-051) — every
 // edition they've appeared in, in one place, for resolving a state's
 // dispute live rather than after the conversation. Financial columns
 // only render when the caller's role includes them (getPersonDetail
 // already omits them for viewers; entitlementAmount stays undefined).
-export function ParticipationDrawer({ person, closeHref }: { person: PersonDetail; closeHref: string }) {
+export function ParticipationDrawer({
+  person,
+  closeHref,
+  canReveal,
+}: {
+  person: PersonDetail
+  closeHref: string
+  // Viewers see the masked form (getPersonDetail already produces that)
+  // but never the reveal control itself — the server action re-checks
+  // the role too (defence in depth), but there's no reason to render a
+  // button that can only ever fail for them.
+  canReveal?: boolean
+}) {
   const showAmounts = person.history.some((h) => h.entitlementAmount !== undefined)
 
   return (
@@ -22,6 +35,8 @@ export function ParticipationDrawer({ person, closeHref }: { person: PersonDetai
         <dt>NIN</dt>
         <dd>{person.maskedNin ?? '—'}</dd>
       </dl>
+
+      {canReveal ? <RevealIdentifier personId={person.id} /> : null}
 
       <h3>Participation history</h3>
       {person.history.length === 0 ? (

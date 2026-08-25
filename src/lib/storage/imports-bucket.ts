@@ -1,3 +1,6 @@
+// Type-only import: the Storage bucket API used below isn't reachable
+// through the RLS-scoped client, so callers pass in an admin client they
+// already created — this file only needs its type, not an instance.
 import type { createAdminClient } from '@/lib/supabase/admin'
 
 export const IMPORTS_BUCKET = 'imports'

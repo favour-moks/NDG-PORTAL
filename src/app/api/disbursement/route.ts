@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import postgres from 'postgres'
 import { getSessionProfile } from '@/lib/auth/guards'
+import { logAccess } from '@/lib/audit/log'
 import { generateBatch, type DisbursementFilters } from '@/lib/export/disbursement/generate'
 import { computeExclusionSummary } from '@/lib/export/disbursement/exclusions'
 import { getDisbursementFormat } from '@/lib/export/disbursement/formats'
@@ -94,13 +95,13 @@ export async function POST(request: Request) {
       generatedAt,
     })
 
-    await sql`
-      insert into access_logs (user_id, role, route, action, edition_id, filters, record_count)
-      values (
-        ${profile.id}, ${profile.role}, '/api/disbursement', 'disbursement_generate',
-        ${body.editionId}, ${sql.json({ ...filters, reference: result.reference })}, ${result.recordCount}
-      )
-    `
+    await logAccess({
+      action: 'disbursement_generate',
+      route: '/api/disbursement',
+      editionId: body.editionId,
+      filters: { ...filters, reference: result.reference },
+      recordCount: result.recordCount,
+    })
 
     const filename = `${slugify(result.reference)}-${generatedAt.toISOString().slice(0, 10)}.${format.fileExtension}`
 

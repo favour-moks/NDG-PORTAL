@@ -118,7 +118,11 @@ export default async function PersonnelListPage({
       />
 
       {personDetail ? (
-        <ParticipationDrawer person={personDetail} closeHref={hrefWithoutParam(rawSearchParams, 'person')} />
+        <ParticipationDrawer
+          person={personDetail}
+          closeHref={hrefWithoutParam(rawSearchParams, 'person')}
+          canReveal
+        />
       ) : null}
     </main>
   )
