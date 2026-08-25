@@ -1,5 +1,6 @@
 import { requireSession } from '@/lib/auth/guards'
 import { createClient } from '@/lib/supabase/server'
+import { logAccess } from '@/lib/audit/log'
 import { applyKeysetCursor, decodeCursor, encodeCursor } from './keyset'
 
 const PAGE_SIZE = 50
@@ -98,7 +99,12 @@ const VIEWER_COLUMNS =
 export async function listParticipations(
   filters: ParticipationFilters,
   cursorParam: string | null,
-  pageSize: number = PAGE_SIZE
+  pageSize: number = PAGE_SIZE,
+  // fetchAllParticipations() (exports) calls this in a loop purely to
+  // page through rows it already logs once as a single 'export' row —
+  // without this, one export would also emit a 'list' row per 1,000-row
+  // page it paginated through, which is log noise, not a second read.
+  skipAudit = false
 ): Promise<ParticipationsPage> {
   const profile = await requireSession()
   const supabase = await createClient()
@@ -170,6 +176,22 @@ export async function listParticipations(
     rows.length === pageSize && last?.full_name
       ? encodeCursor({ name: last.full_name, id: last.id })
       : null
+
+  // FR-018: every beneficiary read is logged, not just exports — this is
+  // the query every participants/personnel/DRM list ultimately goes
+  // through, so logging it here covers all of them at once. Awaited (not
+  // fire-and-forget): logAccess() already swallows its own errors so it
+  // can't fail this request, but an un-awaited insert can be dropped
+  // outright when a serverless function suspends right after returning.
+  if (!skipAudit) {
+    await logAccess({
+      action: 'list',
+      route: 'participations',
+      editionId: filters.editionId,
+      filters: filters as unknown as Record<string, unknown>,
+      recordCount: count ?? 0,
+    })
+  }
 
   return { rows, nextCursor, totalCount: count ?? 0 }
 }

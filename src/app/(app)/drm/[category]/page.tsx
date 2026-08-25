@@ -115,7 +115,11 @@ export default async function DrmListPage({
       />
 
       {personDetail ? (
-        <ParticipationDrawer person={personDetail} closeHref={hrefWithoutParam(rawSearchParams, 'person')} />
+        <ParticipationDrawer
+          person={personDetail}
+          closeHref={hrefWithoutParam(rawSearchParams, 'person')}
+          canReveal
+        />
       ) : null}
     </main>
   )

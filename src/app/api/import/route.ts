@@ -11,6 +11,12 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { ensureImportsBucket, IMPORTS_BUCKET, MAX_IMPORT_FILE_SIZE } from '@/lib/storage/imports-bucket'
 
 const ALLOWED_EXTENSIONS = ['.xlsx', '.csv']
+// Counted from import_runs directly rather than the shared
+// src/lib/rate-limit.ts store — import_runs is already the real audit
+// trail for this action (a row is written for every attempt, accepted or
+// rejected), so a second synthetic counter here would just be duplicate
+// bookkeeping. rate-limit.ts exists for actions (sign-in) with no
+// existing audit table to count from before a session even exists.
 const IMPORTS_PER_HOUR_LIMIT = 5
 
 export async function POST(request: Request) {

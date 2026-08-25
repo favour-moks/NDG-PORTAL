@@ -63,6 +63,15 @@ const DRM_COLUMNS: PdfColumn[] = [
   { header: 'Accreditation status', get: (r) => yesNo(r.arrival_accredited) },
 ]
 
+// Pulled out of buildParticipationsPdf so the role-based column decision
+// — the actual thing that keeps money out of a viewer's export — can be
+// asserted directly in a test without parsing a compiled PDF buffer,
+// which react-pdf's font/content-stream encoding makes an unreliable
+// thing to substring-search (see tests/rls/viewer-financial.test.ts).
+export function selectPdfColumns(role: Role, variant: 'standard' | 'drm' = 'standard'): PdfColumn[] {
+  return variant === 'drm' ? DRM_COLUMNS : role === 'viewer' ? BASE_COLUMNS : [...BASE_COLUMNS, ...EDITOR_ONLY_COLUMNS]
+}
+
 // A single <Page> that overflows auto-splits into multiple rendered PDF
 // pages; elements marked `fixed` (the title, disclaimer, header row, and
 // page-number footer) repeat on every one of those pages for free — this
@@ -75,8 +84,7 @@ export async function buildParticipationsPdf(
   disclaimer?: string,
   variant: 'standard' | 'drm' = 'standard'
 ): Promise<Buffer> {
-  const columns =
-    variant === 'drm' ? DRM_COLUMNS : role === 'viewer' ? BASE_COLUMNS : [...BASE_COLUMNS, ...EDITOR_ONLY_COLUMNS]
+  const columns = selectPdfColumns(role, variant)
 
   const doc = (
     <Document>

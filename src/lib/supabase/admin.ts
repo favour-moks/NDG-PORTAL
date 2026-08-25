@@ -8,6 +8,8 @@ import type { Database } from '@/types/database'
 //   - Import writes (server-side, after validation)
 //   - Export/disbursement file generation (bypassing the 1,000-row default cap)
 //   - Reference-data seeding
+//   - Admin — Users screen: last sign-in (auth.admin.listUsers) and account
+//     deletion as a compensating action when inviteUser()'s profile write fails
 //
 // Every call site that imports this file must carry a comment explaining why
 // it needs to bypass RLS. Never import this from a Client Component or expose

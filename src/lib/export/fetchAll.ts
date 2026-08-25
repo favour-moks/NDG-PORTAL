@@ -14,7 +14,11 @@ export async function fetchAllParticipations(filters: ParticipationFilters): Pro
   let cursor: string | null = null
 
   for (;;) {
-    const page = await listParticipations(filters, cursor, EXPORT_PAGE_SIZE)
+    // skipAudit: the export route logs one 'export' row for the whole
+    // operation (route.ts) — without this, paginating through, say, 3,000
+    // rows here would also emit three separate 'list' audit rows for what
+    // is really one read.
+    const page = await listParticipations(filters, cursor, EXPORT_PAGE_SIZE, true)
     rows.push(...page.rows)
     if (!page.nextCursor) break
     cursor = page.nextCursor
