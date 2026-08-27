@@ -1,26 +1,166 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Palette sampled directly from the NDG logo (public/NDG Logo.jpeg) —
+   teal (NIGER), green (DELTA), orange/gold (GAMES), plus the brighter
+   cyan/lime/red-orange accents from the running figures themselves. */
+@theme {
+  --color-brand-50: #e7f6f6;
+  --color-brand-100: #c7e9ea;
+  --color-brand-200: #94d5d7;
+  --color-brand-300: #5cbfc2;
+  --color-brand-400: #2b9fa2;
+  --color-brand-500: #11777b;
+  --color-brand-600: #0e6367;
+  --color-brand-700: #0c5054;
+  --color-brand-800: #0a3f42;
+  --color-brand-900: #073033;
+
+  --color-leaf-50: #eaf7ee;
+  --color-leaf-100: #cdead8;
+  --color-leaf-300: #7fc99c;
+  --color-leaf-500: #298d4f;
+  --color-leaf-600: #21713f;
+  --color-leaf-700: #1a5931;
+
+  --color-accent-100: #fdecd1;
+  --color-accent-300: #f6c471;
+  --color-accent-500: #ee9716;
+  --color-accent-600: #d17f0d;
+  --color-accent-700: #a5640b;
+
+  --color-cyan-500: #01b4b8;
+  --color-lime-500: #b6da3a;
+  --color-flame-500: #ff5309;
+
+  --color-navy-50: #f2f5f5;
+  --color-navy-100: #e1e7e8;
+  --color-navy-300: #93a5a7;
+  --color-navy-500: #4a6265;
+  --color-navy-700: #24393b;
+  --color-navy-800: #16292b;
+  --color-navy-900: #0d1b1c;
+
+  --color-surface: #f7faf9;
+  --color-surface-raised: #ffffff;
+  --color-ink: #202b2c;
+  --color-ink-muted: #5f6f70;
+  --color-line: #dde5e4;
+
+  --color-success: #21713f;
+  --color-success-bg: #eaf7ee;
+  --color-warning: #a5640b;
+  --color-warning-bg: #fdecd1;
+  --color-danger: #b3273a;
+  --color-danger-bg: #fbe7e9;
+  --color-neutral-bg: #e6ecec;
+
+  --font-sans: var(--font-sans), "Rubik", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    font-family: var(--font-sans);
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    background: var(--color-surface);
+    color: var(--color-ink);
+  }
+
+  h1 {
+    @apply text-2xl font-semibold tracking-tight text-navy-800 mb-4;
+  }
+
+  h2 {
+    @apply text-lg font-semibold text-navy-800 mt-6 mb-3;
+  }
+
+  h3 {
+    @apply text-base font-semibold text-navy-700 mt-4 mb-2;
+  }
+
+  main {
+    @apply mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8;
+  }
+
+  p {
+    @apply text-ink-muted leading-relaxed;
+  }
+
+  a {
+    @apply text-brand-500 underline decoration-brand-200 underline-offset-2 hover:text-brand-700;
+  }
+
+  label {
+    @apply block text-sm font-medium text-navy-700 mt-3 mb-1;
+  }
+
+  input,
+  select,
+  textarea {
+    @apply w-full max-w-md rounded-md border border-line bg-surface-raised px-3 py-2 text-sm text-ink shadow-sm transition;
+    @apply focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100;
+  }
+
+  input[type="checkbox"] {
+    @apply mr-2 h-4 w-4 max-w-none w-auto accent-brand-500;
+  }
+
+  fieldset {
+    @apply rounded-md border border-line p-3 mt-3;
+  }
+
+  legend {
+    @apply px-1 text-sm font-medium text-navy-700;
+  }
+
+  button {
+    @apply inline-flex items-center justify-center rounded-md bg-accent-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition;
+    @apply hover:bg-accent-600 disabled:cursor-not-allowed disabled:bg-navy-100 disabled:text-navy-300;
+  }
+
+  button[type="button"]:not([class*="bg-"]) {
+    @apply bg-navy-700 hover:bg-navy-800;
+  }
+
+  table {
+    @apply w-full border-collapse overflow-hidden rounded-lg bg-surface-raised text-sm shadow-sm;
+  }
+
+  thead {
+    @apply bg-navy-800 text-white;
+  }
+
+  th {
+    @apply px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide;
+  }
+
+  td {
+    @apply border-t border-line px-3 py-2 align-middle;
+  }
+
+  tbody tr:hover {
+    @apply bg-brand-50;
+  }
+
+  nav ul {
+    @apply flex flex-wrap gap-x-1 gap-y-1 list-none p-0 m-0;
+  }
+
+  form {
+    @apply max-w-xl;
+  }
+
+  [role="alert"] {
+    @apply mt-3 rounded-md border border-danger bg-danger-bg px-3 py-2 text-sm font-medium text-danger no-underline;
+  }
+
+  [role="status"] {
+    @apply mt-3 rounded-md border border-brand-200 bg-brand-50 px-3 py-2 text-sm font-medium text-brand-700;
+  }
+
+  aside {
+    @apply fixed inset-y-0 right-0 z-20 w-full max-w-md overflow-y-auto border-l border-line bg-surface-raised p-6 shadow-xl;
+  }
 }
