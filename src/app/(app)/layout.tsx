@@ -1,6 +1,10 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { requireSession } from '@/lib/auth/guards'
 import { signOut } from '@/lib/actions/auth'
+
+const linkClass =
+  'rounded-md px-3 py-1.5 text-sm font-medium text-navy-100 no-underline transition hover:bg-navy-700 hover:text-white'
 
 // Role-scoped: viewers get exactly one destination beyond home
 // (Participants, which already redirects them straight into their own
@@ -16,60 +20,99 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const isAdmin = profile.role === 'admin'
 
   return (
-    <div>
-      <header>
-        <nav>
-          <span>NDG Payment Accreditation Portal</span>
-          <ul>
+    <div className="min-h-screen bg-surface">
+      <header className="border-b border-navy-900 bg-navy-800">
+        <nav className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 sm:px-6 lg:px-8">
+          <Link href="/" className="flex items-center gap-2 no-underline">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white p-1 shadow-sm">
+              <Image src="/logo.jpeg" alt="Niger Delta Games" width={28} height={28} priority className="h-full w-full object-contain" />
+            </span>
+            <span className="hidden text-sm font-semibold text-white sm:inline">NDG Payment Portal</span>
+          </Link>
+
+          <ul className="flex flex-1 flex-wrap items-center gap-1">
             <li>
-              <Link href="/">Home</Link>
+              <Link className={linkClass} href="/">
+                Home
+              </Link>
             </li>
             <li>
-              <Link href="/participants">Participants</Link>
+              <Link className={linkClass} href="/participants">
+                Participants
+              </Link>
             </li>
             {canEdit ? (
               <>
                 <li>
-                  <Link href="/personnel">Personnel</Link>
+                  <Link className={linkClass} href="/personnel">
+                    Personnel
+                  </Link>
                 </li>
                 <li>
-                  <Link href="/drm">DRM</Link>
+                  <Link className={linkClass} href="/drm">
+                    DRM
+                  </Link>
                 </li>
                 <li>
-                  <Link href="/accreditation">Accreditation</Link>
+                  <Link className={linkClass} href="/accreditation">
+                    Accreditation
+                  </Link>
                 </li>
                 <li>
-                  <Link href="/imports">Import</Link>
+                  <Link className={linkClass} href="/imports">
+                    Import
+                  </Link>
                 </li>
                 <li>
-                  <Link href="/imports/checklist">Upload checklist</Link>
+                  <Link className={linkClass} href="/imports/checklist">
+                    Checklist
+                  </Link>
                 </li>
                 <li>
-                  <Link href="/review">Review queue</Link>
+                  <Link className={linkClass} href="/review">
+                    Review
+                  </Link>
                 </li>
                 <li>
-                  <Link href="/payments">Payments</Link>
+                  <Link className={linkClass} href="/payments">
+                    Payments
+                  </Link>
                 </li>
                 <li>
-                  <Link href="/admin/editions">Editions</Link>
+                  <Link className={linkClass} href="/admin/editions">
+                    Editions
+                  </Link>
                 </li>
                 <li>
-                  <Link href="/admin/reference">Reference data</Link>
+                  <Link className={linkClass} href="/admin/reference">
+                    Reference data
+                  </Link>
                 </li>
               </>
             ) : null}
             {isAdmin ? (
               <li>
-                <Link href="/admin/users">Users</Link>
+                <Link className={linkClass} href="/admin/users">
+                  Users
+                </Link>
               </li>
             ) : null}
           </ul>
-          <span>
-            {profile.fullName} ({profile.role})
-          </span>
-          <form action={signOut}>
-            <button type="submit">Sign out</button>
-          </form>
+
+          <div className="flex items-center gap-3">
+            <div className="text-right leading-tight">
+              <div className="text-sm font-medium text-white">{profile.fullName}</div>
+              <div className="text-xs uppercase tracking-wide text-navy-300">{profile.role}</div>
+            </div>
+            <form action={signOut}>
+              <button
+                type="submit"
+                className="rounded-md border border-navy-500 bg-transparent px-3 py-1.5 text-sm font-medium text-navy-100 shadow-none hover:bg-navy-700 hover:text-white"
+              >
+                Sign out
+              </button>
+            </form>
+          </div>
         </nav>
       </header>
       <main>{children}</main>
